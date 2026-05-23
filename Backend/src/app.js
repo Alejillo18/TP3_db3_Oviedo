@@ -16,45 +16,46 @@ app.get("/api/reporte-ventas", async (req, res) => {
     const ventasColeccion = db.collection("ventas");
     const pipeline = [
       {
-        $match: {
-          precio: {
-            $gt: 0,
+        '$match': {
+          'precio': {
+            '$gt': 0
+          }
+        }
+      }, {
+        '$project': {
+          'categoria': 1,
+          'cantidad': 1,
+          'recaudacionVenta': {
+            '$multiply': [
+              '$cantidad', '$precio'
+            ]
+          }
+        }
+      }, {
+        '$group': {
+          '_id': '$categoria',
+          'totalRecaudado': {
+            '$sum': '$recaudacionVenta'
           },
-        },
-      },
-      {
-        $project: {
-          categoria: 1,
-          cantidad: 1,
-          recaudacionVentas: {
-            $multiply: ["$cantidad", "$precio"],
+          'cantidadItems': {
+            '$sum': '$cantidad'
           },
-        },
-      },
-      {
-        $group: {
-          _id: "$categoria",
-          totalRecaudado: {
-            $sum: "$recaudacionVentas",
-          },
-          cantidadItems: {
-            $sum: "$cantidad",
-          },
-        },
-      },
-      {
-        $match: {
-          totalRecaudado: {
-            $gte: 315,
-          },
-        },
-      },
-      {
-        $sort: {
-          totalRecaudado: -1,
-        },
-      },
-    ];
+          'ventaPromedio': {
+            '$avg': '$recaudacionVenta'
+          }
+        }
+      }, {
+        '$match': {
+          'totalRecaudado': {
+            '$gt': 315
+          }
+        }
+      }, {
+        '$sort': {
+          'totalRecaudado': -1
+        }
+      }
+    ]
     const reporte = await ventasColeccion.aggregate(pipeline).toArray();
     res
       .status(200)

@@ -3,7 +3,7 @@
 
 _Aggregations_
 
-
+```
   [
   {
     '$match': {
@@ -13,9 +13,9 @@ _Aggregations_
     }
   }, {
     '$project': {
-      'categoria': 1, 
-      'cantidad': 1, 
-      'recaudacionVentas': {
+      'categoria': 1,
+      'cantidad': 1,
+      'recaudacionVenta': {
         '$multiply': [
           '$cantidad', '$precio'
         ]
@@ -23,18 +23,21 @@ _Aggregations_
     }
   }, {
     '$group': {
-      '_id': '$categoria', 
+      '_id': '$categoria',
       'totalRecaudado': {
-        '$sum': '$recaudacionVentas'
-      }, 
+        '$sum': '$recaudacionVenta'
+      },
       'cantidadItems': {
         '$sum': '$cantidad'
+      },
+      'ventaPromedio': {
+        '$avg': '$recaudacionVenta'
       }
     }
   }, {
     '$match': {
       'totalRecaudado': {
-        '$gte': 315
+        '$gt': 315
       }
     }
   }, {
@@ -43,3 +46,4 @@ _Aggregations_
     }
   }
 ]
+```
